@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from Data import MyData
+from data import MyData
 from model import Encoder, Decoder
 from utils import read_langs, max_length, pad_sequences, sort_batch, loss_function
 
