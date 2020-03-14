@@ -35,6 +35,8 @@ class Encoder(nn.Module, ABC):
         # output: (max_lengths, batch_size, encoder_units)
         # self.hidden: (1, batch_size, encoder_units)
 
+        output, _ = pad_packed_sequence(output)
+
         return output, hidden
 
     def init_hidden(self, device):
@@ -83,19 +85,19 @@ class Decoder(nn.Module, ABC):
         # context_vector: (batch_size, encoder_units)
 
         x = self.embedding(x)
-        # x: (batch_size, 1, embedding_dim)
+        # x: (batch_size, max_length, embedding_dim)
 
         x = torch.cat((context_vector.unsqueeze(1), x), -1)
-        # x: (batch_size, 1, encoder_units + embedding_dims)
+        # x: (batch_size, max_length, encoder_units + embedding_dims)
 
-        output, state = self.gru(x)
-        # output:
+        output, hidden = self.gru(x)
+        # output: (batch_size, max_length,
         # state:
 
-        output = output.view(-1, output.size[2])
+        output = output.view(-1, output.size()[2])
         x = self.fc(output)
 
-        return x, state, attention_weights
+        return x, hidden, attention_weights
 
     def init_hidden(self, device):
         return torch.zeros((1, self.batch_size, self.decoder_units), device=device)
