@@ -100,3 +100,7 @@ def main():
         print('Epoch {} Loss {:.4f}'.format(epoch + 1,
                                             total_loss / N_BATCH))
         print('Time taken for 1 epoch {} sec\n'.format(time.time() - start))
+
+
+if __name__ == '__main__':
+    main()

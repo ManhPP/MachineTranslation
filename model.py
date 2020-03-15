@@ -58,7 +58,7 @@ class Decoder(nn.Module, ABC):
 
         self.W1 = nn.Linear(encoder_units, decoder_units)
         self.W2 = nn.Linear(encoder_units, decoder_units)
-        self.V = nn.Linear(encoder_units, 1)
+        self.V = nn.Linear(decoder_units, 1)
 
     def forward(self, x, hidden, encoder_output):
         """
@@ -75,20 +75,21 @@ class Decoder(nn.Module, ABC):
         # hidden: (batch_size, 1, encoder_units)
 
         score = torch.tanh(self.W1(encoder_output) + self.W2(hidden))
-        # score: (batch_size, max_length, encoder_units)
+        # score: (batch_size, max_length, decoder_units)
 
         attention_weights = F.softmax(self.V(score), dim=1)
-        # attention_weights: (batch_size, max_length, encoder_units)
+        # attention_weights: (batch_size, max_length, 1)
 
         context_vector = attention_weights * encoder_output
+        # context_vector: (batch_size, max_length, encoder_units)
         context_vector = torch.sum(context_vector, dim=1)
         # context_vector: (batch_size, encoder_units)
 
         x = self.embedding(x)
-        # x: (batch_size, max_length, embedding_dim)
+        # x: (batch_size, 1, embedding_dim)
 
         x = torch.cat((context_vector.unsqueeze(1), x), -1)
-        # x: (batch_size, max_length, encoder_units + embedding_dims)
+        # x: (batch_size, 1, encoder_units + embedding_dims)
 
         output, hidden = self.gru(x)
         # output: (batch_size, max_length,
